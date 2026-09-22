@@ -1,0 +1,331 @@
+// Prisma Schema for ISKCON Bookstore & Volunteer Management System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  mobile       String    @unique
+  email        String    @unique
+  passwordHash String
+  role         String    @default("PUBLIC") // PUBLIC, VOLUNTEER, ADMIN, SUPER_ADMIN
+  status       String    @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  volunteer     Volunteer?
+  notifications Notification[]
+  auditLogs     AuditLog[]
+}
+
+model Volunteer {
+  id                  String   @id @default(uuid())
+  volunteerId         String   @unique // e.g. VOL1001
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName            String
+  mobile              String
+  email               String
+  city                String
+  address             String
+  age                 Int
+  preferredLanguage   String   @default("English")
+  emergencyContact    String
+  verificationDetails String?
+  profilePhoto        String?
+  approvalStatus      String   @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, REJECTED, ACTIVE, INACTIVE
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  orders      VolunteerOrder[]
+  allocations BookAllocation[]
+  sales       Sale[]
+  payments    Payment[]
+  returns     Return[]
+  settlements Settlement[]
+  qrCode      VolunteerQR?
+}
+
+model Campaign {
+  id                 String   @id @default(uuid())
+  campaignId         String   @unique // e.g. CAMP-2026
+  name               String
+  startDate          DateTime
+  endDate            DateTime
+  status             String   @default("DRAFT") // DRAFT, REGISTRATION_OPEN, ACTIVE, RETURN_PERIOD, SETTLEMENT_PERIOD, COMPLETED, CANCELLED
+  registrationStart  DateTime
+  registrationEnd    DateTime
+  orderingStart      DateTime
+  orderingEnd        DateTime
+  returnDeadline     DateTime
+  settlementDeadline DateTime
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  inventories Inventory[]
+  orders      VolunteerOrder[]
+  allocations BookAllocation[]
+  sales       Sale[]
+  payments    Payment[]
+  returns     Return[]
+  settlements Settlement[]
+}
+
+model BookCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  books Book[]
+}
+
+model Book {
+  id          String   @id @default(uuid())
+  bookId      String   @unique // e.g. BK-BG-001
+  name        String
+  author      String   @default("A.C. Bhaktivedanta Swami Prabhupada")
+  description String
+  categoryId  String
+  category    BookCategory @relation(fields: [categoryId], references: [id])
+  coverImage  String?
+  featured    Boolean  @default(false)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  editions BookEdition[]
+}
+
+model Language {
+  id        String   @id @default(uuid())
+  name      String   @unique // e.g. English, Telugu, Hindi
+  code      String   @unique // e.g. en, te, hi
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  editions BookEdition[]
+}
+
+model BookEdition {
+  id          String   @id @default(uuid())
+  bookId      String
+  book        Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  languageId  String
+  language    Language @relation(fields: [languageId], references: [id])
+  editionName String   @default("Standard Edition")
+  isbn        String?
+  price       Float
+  pages       Int      @default(300)
+  bookSize    String   @default("Medium (Hardbound)")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  inventories Inventory[]
+  orderItems  VolunteerOrderItem[]
+  allocations BookAllocation[]
+  sales       Sale[]
+  returnItems ReturnItem[]
+
+  @@unique([bookId, languageId, editionName])
+}
+
+model Inventory {
+  id             String      @id @default(uuid())
+  bookEditionId  String
+  bookEdition    BookEdition @relation(fields: [bookEditionId], references: [id], onDelete: Cascade)
+  campaignId     String
+  campaign       Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  totalStock     Int         @default(0)
+  availableStock Int         @default(0)
+  reservedStock  Int         @default(0)
+  allocatedStock Int         @default(0)
+  soldStock      Int         @default(0)
+  returnedStock  Int         @default(0)
+  damagedStock   Int         @default(0)
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([bookEditionId, campaignId])
+}
+
+model VolunteerOrder {
+  id          String      @id @default(uuid())
+  orderId     String      @unique // e.g. ORD-1001
+  volunteerId String
+  volunteer   Volunteer   @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  campaignId  String
+  campaign    Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  orderDate   DateTime    @default(now())
+  status      String      @default("PENDING") // PENDING, APPROVED, PARTIALLY_APPROVED, READY_FOR_PICKUP, PICKED_UP, COMPLETED, CANCELLED
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  items VolunteerOrderItem[]
+}
+
+model VolunteerOrderItem {
+  id                String         @id @default(uuid())
+  orderId           String
+  order             VolunteerOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bookEditionId     String
+  bookEdition       BookEdition    @relation(fields: [bookEditionId], references: [id])
+  requestedQuantity Int
+  approvedQuantity  Int            @default(0)
+}
+
+model BookAllocation {
+  id            String      @id @default(uuid())
+  allocationId  String      @unique // e.g. ALC-1001
+  volunteerId   String
+  volunteer     Volunteer   @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  campaignId    String
+  campaign      Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  bookEditionId String
+  bookEdition   BookEdition @relation(fields: [bookEditionId], references: [id])
+  quantity      Int
+  issuedAt      DateTime    @default(now())
+  issuedBy      String      @default("Admin")
+  receivedAt    DateTime?
+  status        String      @default("ISSUED") // ISSUED, RECEIVED_BY_VOLUNTEER, RETURNED
+}
+
+model Sale {
+  id                String      @id @default(uuid())
+  saleId            String      @unique // e.g. SAL-1001
+  volunteerId       String
+  volunteer         Volunteer   @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  campaignId        String
+  campaign          Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  bookEditionId     String
+  bookEdition       BookEdition @relation(fields: [bookEditionId], references: [id])
+  quantity          Int
+  sellingPrice      Float
+  totalAmount       Float
+  paymentMethod     String      @default("UPI") // UPI, CASH, OTHER
+  customerReference String?
+  saleDate          DateTime    @default(now())
+  createdAt         DateTime    @default(now())
+
+  payments Payment[]
+}
+
+model Payment {
+  id            String    @id @default(uuid())
+  paymentId     String    @unique // e.g. PAY-1001
+  transactionId String    @unique // Unique UPI / Gateway ref
+  volunteerId   String
+  volunteer     Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  campaignId    String
+  campaign      Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  saleId        String?
+  sale          Sale?     @relation(fields: [saleId], references: [id])
+  amount        Float
+  paymentMethod String    @default("UPI") // UPI, CASH, ONLINE
+  status        String    @default("VERIFIED") // PENDING, SUCCESSFUL, FAILED, REFUNDED, VERIFIED
+  paymentDate   DateTime  @default(now())
+  verifiedBy    String?
+  verifiedAt    DateTime?
+}
+
+model VolunteerQR {
+  id          String    @id @default(uuid())
+  volunteerId String    @unique
+  volunteer   Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  qrReference String    @unique // e.g. QR-VOL1001
+  qrData      String    // e.g. upi://pay?pa=iskcon.books@upi&pn=ISKCON+Bookstore&tr=VOL1001
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Return {
+  id            String    @id @default(uuid())
+  returnId      String    @unique // e.g. RET-1001
+  volunteerId   String
+  volunteer     Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  campaignId    String
+  campaign      Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  status        String    @default("REQUESTED") // REQUESTED, APPROVED, RECEIVED_BY_TEMPLE, PARTIALLY_RECEIVED, COMPLETED, REJECTED
+  requestedDate DateTime  @default(now())
+  approvedDate  DateTime?
+  receivedDate  DateTime?
+  notes         String?
+
+  items ReturnItem[]
+}
+
+model ReturnItem {
+  id                String      @id @default(uuid())
+  returnId          String
+  returnOrder       Return      @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  bookEditionId     String
+  bookEdition       BookEdition @relation(fields: [bookEditionId], references: [id])
+  requestedQuantity Int
+  approvedQuantity  Int         @default(0)
+  receivedQuantity  Int         @default(0)
+}
+
+model Settlement {
+  id              String    @id @default(uuid())
+  settlementId    String    @unique // e.g. SET-1001
+  volunteerId     String
+  volunteer       Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  campaignId      String
+  campaign        Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  totalSales      Float
+  amountCollected Float
+  totalPaid       Float
+  pendingAmount   Float
+  status          String    @default("PENDING") // PENDING, PARTIALLY_SETTLED, COMPLETED
+  settlementDate  DateTime?
+  verifiedBy      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([volunteerId, campaignId])
+}
+
+model Notification {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           String   // ORDER_UPDATE, VOLUNTEER_APPROVED, RETURN_ALERT, SETTLEMENT_UPDATE, INVENTORY_LOW
+  title          String
+  message        String
+  read           Boolean  @default(false)
+  relatedEntity  String?
+  relatedEntityId String?
+  createdAt      DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  role       String   @default("SYSTEM")
+  action     String   // INVENTORY_ADJUSTMENT, ALLOCATION_CREATED, SALE_RECORDED, VOLUNTEER_APPROVED, SETTLEMENT_COMPLETED
+  entityType String   // INVENTORY, ALLOCATION, VOLUNTEER, SALE, SETTLEMENT, CAMPAIGN
+  entityId   String?
+  oldData    String?  // JSON string
+  newData    String?  // JSON string
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
+
+model WebsiteContent {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  title     String
+  content   String
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+}
