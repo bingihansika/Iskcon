@@ -5,7 +5,7 @@ import { Shield, UserCheck, Crown, Sparkles, ChevronDown, ChevronUp } from 'luci
 import { useRouter } from 'next/navigation';
 
 export const DemoSwitcher: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 

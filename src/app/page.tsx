@@ -63,39 +63,39 @@ export default async function HomePage() {
   return (
     <div className="space-y-16 pb-16">
       {/* HERO SECTION */}
-      <section className="relative bg-gradient-to-b from-maroon-950 via-amber-950 to-stone-950 text-white overflow-hidden py-20 px-4 sm:px-6 lg:px-8 border-b-4 border-saffron-600">
-        <div className="absolute inset-0 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
+      <section className="relative bg-gradient-to-br from-maroon-950 via-maroon-900 to-amber-950 text-white overflow-hidden py-20 px-4 sm:px-6 lg:px-8 border-b-4 border-saffron-500 shadow-2xl">
+        <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center space-x-2 bg-saffron-600/30 border border-saffron-500/40 text-saffron-300 px-4 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md">
+            <div className="inline-flex items-center space-x-2 bg-saffron-500/20 border border-saffron-400/50 text-saffron-300 px-4 py-1.5 rounded-full text-xs font-bold backdrop-blur-md">
               <Sparkles className="w-4 h-4 text-saffron-400 animate-pulse" />
               <span>Prabhupada Marathon Book Distribution</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-serif tracking-tight leading-tight text-white">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-serif tracking-tight leading-tight text-white drop-shadow-md">
               {heroHeadline.includes('.') ? (
                 <>
-                  {heroHeadline.split('.')[0]}. <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-saffron-400 via-amber-300 to-yellow-200">
+                  <span className="text-white block sm:inline">{heroHeadline.split('.')[0]}.</span>{' '}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-saffron-300 via-amber-200 to-yellow-300 block sm:inline">
                     {heroHeadline.split('.').slice(1).join('.')}
                   </span>
                 </>
               ) : (
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-saffron-400 via-amber-300 to-yellow-200">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-saffron-300 via-amber-200 to-yellow-300">
                   {heroHeadline}
                 </span>
               )}
             </h1>
 
-            <p className="text-base sm:text-lg text-amber-100/90 leading-relaxed font-sans max-w-2xl mx-auto lg:mx-0">
+            <p className="text-base sm:text-lg text-amber-100/95 leading-relaxed font-sans max-w-2xl mx-auto lg:mx-0 drop-shadow-sm">
               {heroSubtitle}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
               <Link
                 href="/bookstore"
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-saffron-500 to-amber-500 hover:from-saffron-600 hover:to-amber-600 text-maroon-950 font-extrabold px-7 py-3.5 rounded-2xl shadow-xl shadow-saffron-600/30 transition transform hover:-translate-y-0.5"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-saffron-500 to-amber-500 hover:from-saffron-400 hover:to-amber-400 text-maroon-950 font-black px-7 py-3.5 rounded-2xl shadow-xl shadow-saffron-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0"
               >
                 <BookOpen className="w-5 h-5" />
                 <span>Browse Bookstore</span>
@@ -103,15 +103,15 @@ export default async function HomePage() {
 
               <Link
                 href="/volunteer/register"
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-white/10 hover:bg-white/20 text-white border border-amber-400/40 font-bold px-7 py-3.5 rounded-2xl backdrop-blur-md transition"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-maroon-900/80 hover:bg-maroon-800 text-white border border-saffron-400/60 font-bold px-7 py-3.5 rounded-2xl backdrop-blur-md transition shadow-md"
               >
-                <UserCheck className="w-5 h-5 text-amber-300" />
+                <UserCheck className="w-5 h-5 text-saffron-400" />
                 <span>Become a Volunteer</span>
               </Link>
 
               <Link
                 href="/login"
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 text-amber-200 hover:text-white font-semibold px-4 py-3.5 transition"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 text-saffron-300 hover:text-white font-bold px-4 py-3.5 transition underline underline-offset-4 decoration-saffron-500/40"
               >
                 <span>Volunteer Login</span>
                 <ChevronRight className="w-4 h-4" />
@@ -121,40 +121,41 @@ export default async function HomePage() {
 
           {/* Hero Feature Card */}
           <div className="lg:col-span-5">
-            <div className="bg-gradient-to-b from-white/15 to-white/5 border border-amber-400/30 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-6">
-              <div className="flex items-center justify-between border-b border-amber-400/20 pb-4">
+            <div className="bg-gradient-to-b from-maroon-900/90 to-amber-950/90 border-2 border-saffron-500/40 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-6">
+              <div className="flex items-center justify-between border-b border-saffron-500/30 pb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-saffron-500 flex items-center justify-center text-maroon-950 font-bold">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-saffron-500 to-amber-400 flex items-center justify-center text-maroon-950 font-bold shadow-lg">
                     <Flame className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="text-lg font-serif font-bold text-white">Active Campaign</h3>
-                    <p className="text-xs text-amber-300 font-medium">Live Distribution Marathon</p>
+                    <p className="text-xs text-saffron-300 font-semibold">Live Distribution Marathon</p>
                   </div>
                 </div>
-                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-xs px-3 py-1 rounded-full font-bold">
-                  ● ACTIVE
+                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-xs px-3 py-1 rounded-full font-extrabold flex items-center space-x-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span>ACTIVE</span>
                 </span>
               </div>
 
               {activeCampaign ? (
                 <div className="space-y-4 text-xs text-amber-100">
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2">
-                    <p className="text-sm font-serif font-bold text-amber-300">{activeCampaign.name}</p>
-                    <div className="grid grid-cols-2 gap-2 text-[11px] pt-1 text-amber-200/80">
-                      <div>Start Date: <span className="font-semibold text-white">{formatDate(activeCampaign.startDate)}</span></div>
-                      <div>End Date: <span className="font-semibold text-white">{formatDate(activeCampaign.endDate)}</span></div>
+                  <div className="bg-maroon-950/70 p-4 rounded-2xl border border-saffron-500/30 space-y-2">
+                    <p className="text-base font-serif font-bold text-saffron-300">{activeCampaign.name}</p>
+                    <div className="grid grid-cols-2 gap-2 text-[11px] pt-1 text-amber-200">
+                      <div>Start Date: <span className="font-bold text-white">{formatDate(activeCampaign.startDate)}</span></div>
+                      <div>End Date: <span className="font-bold text-white">{formatDate(activeCampaign.endDate)}</span></div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-[11px]">
-                    <div className="bg-amber-950/60 p-3 rounded-xl border border-amber-800/40">
-                      <span className="text-amber-400 font-semibold block">Return Deadline</span>
-                      <span className="text-white font-medium">{formatDate(activeCampaign.returnDeadline)}</span>
+                    <div className="bg-maroon-950/80 p-3 rounded-xl border border-amber-800/60">
+                      <span className="text-saffron-400 font-bold block mb-0.5">Return Deadline</span>
+                      <span className="text-white font-semibold">{formatDate(activeCampaign.returnDeadline)}</span>
                     </div>
-                    <div className="bg-amber-950/60 p-3 rounded-xl border border-amber-800/40">
-                      <span className="text-amber-400 font-semibold block">Settlement Deadline</span>
-                      <span className="text-white font-medium">{formatDate(activeCampaign.settlementDeadline)}</span>
+                    <div className="bg-maroon-950/80 p-3 rounded-xl border border-amber-800/60">
+                      <span className="text-saffron-400 font-bold block mb-0.5">Settlement Deadline</span>
+                      <span className="text-white font-semibold">{formatDate(activeCampaign.settlementDeadline)}</span>
                     </div>
                   </div>
                 </div>
@@ -165,7 +166,7 @@ export default async function HomePage() {
               <div className="pt-2">
                 <Link
                   href="/volunteer/register"
-                  className="w-full flex items-center justify-center space-x-2 bg-saffron-600 hover:bg-saffron-700 text-white py-3 rounded-xl font-bold shadow-md transition"
+                  className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-saffron-500 to-amber-500 hover:from-saffron-600 hover:to-amber-600 text-maroon-950 py-3.5 rounded-xl font-extrabold shadow-lg shadow-saffron-500/20 transition"
                 >
                   <span>Register for Campaign</span>
                   <ArrowRight className="w-4 h-4" />
