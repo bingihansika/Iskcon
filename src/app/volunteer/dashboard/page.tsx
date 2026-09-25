@@ -15,11 +15,6 @@ import {
   PlusCircle,
   RotateCcw,
   AlertCircle,
-  UserCheck,
-  ClipboardList,
-  History,
-  Bell,
-  Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -120,6 +115,9 @@ export default function VolunteerDashboardPage() {
   const activeCampaign = data?.activeCampaign;
   const qrCode = volunteer?.qrCode;
 
+  const displayName = volunteer?.fullName || volunteer?.name || 'Devotee';
+  const displayId = volunteer?.volunteerId || 'VOL1001';
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header Banner */}
@@ -130,14 +128,14 @@ export default function VolunteerDashboardPage() {
               Volunteer Dashboard
             </span>
             <span className="text-xs text-amber-300 font-serif font-bold">
-              ID: {volunteer?.volunteerId}
+              ID: {displayId}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">
-            Hare Krishna, {volunteer?.fullName}!
+            Hare Krishna, {displayName}!
           </h1>
           <p className="text-xs text-amber-100/90 font-sans">
-            Campaign: <span className="font-bold text-saffron-300">{activeCampaign?.name || 'Annual Marathon 2026'}</span> • Preferred Language: {volunteer?.preferredLanguage}
+            Campaign: <span className="font-bold text-saffron-300">{activeCampaign?.name || 'Annual Marathon 2026'}</span> • Preferred Language: {volunteer?.preferredLanguage || 'English'}
           </p>
         </div>
 
@@ -158,50 +156,6 @@ export default function VolunteerDashboardPage() {
             <span>Payment QR</span>
           </Link>
         </div>
-      </div>
-
-      {/* QUICK PORTAL NAVIGATION BAR */}
-      <div className="bg-white p-2 rounded-2xl border border-amber-100 shadow-sm flex flex-wrap gap-1.5 text-xs font-medium overflow-x-auto">
-        <Link href="/volunteer/dashboard" className="px-3.5 py-2 rounded-xl bg-amber-100 text-amber-900 font-bold flex items-center space-x-1.5">
-          <BookOpen className="w-3.5 h-3.5 text-amber-800" />
-          <span>Dashboard</span>
-        </Link>
-        <Link href="/volunteer/profile" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <UserCheck className="w-3.5 h-3.5 text-amber-700" />
-          <span>My Profile</span>
-        </Link>
-        <Link href="/volunteer/orders" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <ClipboardList className="w-3.5 h-3.5 text-amber-700" />
-          <span>Book Orders</span>
-        </Link>
-        <Link href="/volunteer/books" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <BookOpen className="w-3.5 h-3.5 text-amber-700" />
-          <span>My Allocated Books</span>
-        </Link>
-        <Link href="/volunteer/sales" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <TrendingUp className="w-3.5 h-3.5 text-amber-700" />
-          <span>Sales Entry</span>
-        </Link>
-        <Link href="/volunteer/qr" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <QrCode className="w-3.5 h-3.5 text-amber-700" />
-          <span>Payment QR</span>
-        </Link>
-        <Link href="/volunteer/returns" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
-          <span>Unsold Returns</span>
-        </Link>
-        <Link href="/volunteer/settlement" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <Wallet className="w-3.5 h-3.5 text-amber-700" />
-          <span>Settlement</span>
-        </Link>
-        <Link href="/volunteer/history" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <History className="w-3.5 h-3.5 text-amber-700" />
-          <span>Distribution History</span>
-        </Link>
-        <Link href="/volunteer/notifications" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
-          <Bell className="w-3.5 h-3.5 text-amber-700" />
-          <span>Notifications</span>
-        </Link>
       </div>
 
       {/* DASHBOARD METRIC CARDS */}
@@ -276,9 +230,9 @@ export default function VolunteerDashboardPage() {
         {/* Quick QR Card */}
         <div className="lg:col-span-5">
           <QRDisplay
-            volunteerName={volunteer?.fullName || 'Volunteer'}
-            volunteerId={volunteer?.volunteerId || 'VOL1001'}
-            qrReference={qrCode?.qrReference || 'QR-VOL1001'}
+            volunteerName={displayName}
+            volunteerId={displayId}
+            qrReference={qrCode?.qrReference || `QR-${displayId}`}
           />
         </div>
 

@@ -774,9 +774,15 @@ export const db: any = {
       let items = store.notifications.filter((n) => store.matchWhere(n, args?.where));
       return applyOrderBy(items, args?.orderBy);
     },
+    count: async (args?: any) => store.notifications.filter((n) => store.matchWhere(n, args?.where)).length,
     create: async (args: any) => {
-      const item = { id: generateId('notif'), ...args.data, createdAt: new Date() };
+      const item = { id: generateId('notif'), ...args.data, read: false, createdAt: new Date() };
       store.notifications.push(item);
+      return item;
+    },
+    update: async (args: any) => {
+      const item = store.notifications.find((n) => store.matchWhere(n, args.where));
+      if (item) Object.assign(item, args.data);
       return item;
     },
     updateMany: async (args: any) => {
