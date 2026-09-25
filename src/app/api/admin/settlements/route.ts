@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     const newPending = Math.max(0, settlement.totalSales - newPaid);
     const newStatus = newPending === 0 ? 'COMPLETED' : 'PARTIALLY_SETTLED';
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx: any) => {
       const set = await tx.settlement.update({
         where: { id: settlementId },
         data: {

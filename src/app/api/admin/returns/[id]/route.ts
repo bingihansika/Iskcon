@@ -20,7 +20,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ error: 'Return request not found' }, { status: 404 });
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       for (const item of returnObj.items) {
         const receivedQty = itemReceivedCounts?.[item.id] !== undefined
           ? parseInt(itemReceivedCounts[item.id], 10)

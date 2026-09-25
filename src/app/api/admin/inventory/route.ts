@@ -71,7 +71,7 @@ export async function PUT(req: Request) {
     }
 
     // Update stock and write mandatory audit log
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx: any) => {
       const inv = await tx.inventory.update({
         where: { id: inventoryId },
         data: {

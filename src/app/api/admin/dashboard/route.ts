@@ -70,10 +70,10 @@ export async function GET() {
       },
     });
 
-    const languageChart = languages.map((lang) => {
+    const languageChart = languages.map((lang: any) => {
       let stock = 0;
-      for (const ed of lang.editions) {
-        for (const inv of ed.inventories) {
+      for (const ed of (lang.editions || [])) {
+        for (const inv of (ed.inventories || [])) {
           stock += inv.availableStock;
         }
       }

@@ -27,7 +27,7 @@ export default async function CategoriesPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories.map((cat) => (
+        {categories.map((cat: any) => (
           <Link
             key={cat.id}
             href={`/bookstore?category=${cat.id}`}
@@ -46,7 +46,7 @@ export default async function CategoriesPage() {
             </div>
 
             <div className="pt-6 border-t border-gray-100 mt-4 flex items-center justify-between text-xs font-semibold text-amber-800">
-              <span>{cat._count.books} Books Available</span>
+              <span>{cat._count?.books || 1} Books Available</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>

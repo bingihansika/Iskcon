@@ -45,7 +45,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       }
 
       // Perform atomic transaction
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: any) => {
         for (const item of order.items) {
           const approvedQty = itemApprovals?.[item.id] !== undefined ? parseInt(itemApprovals[item.id], 10) : item.requestedQuantity;
 

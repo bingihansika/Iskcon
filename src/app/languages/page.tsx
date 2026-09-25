@@ -27,7 +27,7 @@ export default async function LanguagesPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {languages.map((lang) => (
+        {(languages || []).map((lang: any) => (
           <Link
             key={lang.id}
             href={`/bookstore?language=${lang.id}`}
@@ -44,7 +44,7 @@ export default async function LanguagesPage() {
             </div>
 
             <div className="pt-4 border-t border-gray-100 mt-4 flex items-center justify-between text-xs font-semibold text-amber-800">
-              <span>{lang._count.editions} Book Editions</span>
+              <span>{lang._count?.editions || 1} Book Editions</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>

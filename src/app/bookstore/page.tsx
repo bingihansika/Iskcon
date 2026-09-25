@@ -96,7 +96,7 @@ export default async function BookstorePage({ searchParams }: BookstorePageProps
               className="w-full py-3 px-3 rounded-2xl border border-gray-200 focus:outline-none focus:border-saffron-500 text-sm bg-white"
             >
               <option value="">All Categories</option>
-              {categories.map((cat) => (
+              {(categories || []).map((cat: any) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
@@ -112,7 +112,7 @@ export default async function BookstorePage({ searchParams }: BookstorePageProps
               className="w-full py-3 px-3 rounded-2xl border border-gray-200 focus:outline-none focus:border-saffron-500 text-sm bg-white"
             >
               <option value="">All Languages</option>
-              {languages.map((lang) => (
+              {(languages || []).map((lang: any) => (
                 <option key={lang.id} value={lang.id}>
                   {lang.name}
                 </option>
@@ -140,7 +140,7 @@ export default async function BookstorePage({ searchParams }: BookstorePageProps
       {/* Books Grid */}
       {books.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {books.map((book) => (
+          {(books || []).map((book: any) => (
             <BookCard key={book.id} book={book as any} />
           ))}
         </div>

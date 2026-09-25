@@ -21,10 +21,10 @@ export const revalidate = 0;
 export default async function HomePage() {
   // Fetch website CMS contents
   const cmsContents = await prisma.websiteContent.findMany();
-  const contentMap = new Map(cmsContents.map((c) => [c.key, c.content]));
+  const contentMap = new Map((cmsContents || []).map((c: any) => [c.key, c.content]));
 
-  const heroHeadline = contentMap.get('hero_headline') || 'Spread the Knowledge. Distribute the Wisdom.';
-  const heroSubtitle = contentMap.get('hero_subtitle') || 'Join ISKCON devotees worldwide in distributing transcendental literature by His Divine Grace A.C. Bhaktivedanta Swami Prabhupada. Request book packages, manage allocations, collect QR payments, and track campaign settlements seamlessly.';
+  const heroHeadline = String(contentMap.get('hero_headline') || 'Spread the Knowledge. Distribute the Wisdom.');
+  const heroSubtitle = String(contentMap.get('hero_subtitle') || 'Join ISKCON devotees worldwide in distributing transcendental literature by His Divine Grace A.C. Bhaktivedanta Swami Prabhupada. Request book packages, manage allocations, collect QR payments, and track campaign settlements seamlessly.');
 
   // Fetch active campaign
   const activeCampaign = await prisma.campaign.findFirst({
@@ -242,7 +242,7 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredBooks.map((book) => (
+          {(featuredBooks || []).map((book: any) => (
             <BookCard key={book.id} book={book as any} />
           ))}
         </div>
@@ -261,7 +261,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {languages.map((lang) => (
+            {(languages || []).map((lang: any) => (
               <Link
                 key={lang.id}
                 href={`/bookstore?language=${lang.id}`}

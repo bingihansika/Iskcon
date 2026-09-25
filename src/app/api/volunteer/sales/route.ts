@@ -117,7 +117,7 @@ export async function POST(req: Request) {
     const saleId = `SAL-${Math.floor(1000 + Math.random() * 9000)}`;
 
     // Perform atomic transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const sale = await tx.sale.create({
         data: {
           saleId,

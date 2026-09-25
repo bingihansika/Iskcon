@@ -122,7 +122,7 @@ export default async function BookDetailPage({ params }: { params: { id: string 
             </div>
 
             <div className="divide-y divide-gray-100 border border-amber-200/80 rounded-2xl overflow-hidden bg-white">
-              {book.editions.map((ed) => {
+              {(book.editions || []).map((ed: any) => {
                 const availStock = ed.inventories?.[0]?.availableStock || 150;
                 const isLow = availStock < 50;
 
