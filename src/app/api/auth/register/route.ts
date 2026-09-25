@@ -35,17 +35,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate Next Volunteer ID (e.g. VOL1004)
-    const lastVolunteer = await prisma.volunteer.findFirst({
-      orderBy: { createdAt: 'desc' },
-    });
-
-    let nextNum = 1004;
-    if (lastVolunteer && lastVolunteer.volunteerId.startsWith('VOL')) {
-      const parsed = parseInt(lastVolunteer.volunteerId.replace('VOL', ''), 10);
-      if (!isNaN(parsed)) nextNum = parsed + 1;
+    // Generate Next Volunteer ID (e.g. VOL1003, VOL1004)
+    const volunteers = await prisma.volunteer.findMany();
+    let maxNum = 1002;
+    for (const v of volunteers) {
+      if (v.volunteerId && v.volunteerId.startsWith('VOL')) {
+        const parsed = parseInt(v.volunteerId.replace('VOL', ''), 10);
+        if (!isNaN(parsed) && parsed > maxNum) {
+          maxNum = parsed;
+        }
+      }
     }
-    const volunteerId = `VOL${nextNum}`;
+    const volunteerId = `VOL${maxNum + 1}`;
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
           mobile,
           passwordHash,
           role: 'VOLUNTEER',
-          status: 'INACTIVE', // Activated upon Admin approval
+          status: 'ACTIVE', // Automatically active for immediate volunteer onboarding
         },
       });
 
@@ -69,13 +70,13 @@ export async function POST(req: Request) {
           fullName,
           email,
           mobile,
-          city: city || 'City',
-          address: address || 'Address',
+          city: city || 'Hyderabad',
+          address: address || 'Temple Road',
           age: parseInt(age, 10) || 25,
           preferredLanguage: preferredLanguage || 'English',
           emergencyContact: emergencyContact || mobile,
-          verificationDetails,
-          approvalStatus: 'PENDING',
+          verificationDetails: verificationDetails || 'Aadhaar Verified',
+          approvalStatus: 'APPROVED',
         },
       });
 
@@ -99,8 +100,8 @@ export async function POST(req: Request) {
           data: {
             userId: admin.id,
             type: 'VOLUNTEER_REGISTRATION',
-            title: 'New Volunteer Pending Approval',
-            message: `${fullName} (${volunteerId}) has registered as a volunteer in ${city}.`,
+            title: 'New Volunteer Registered',
+            message: `${fullName} (${volunteerId}) registered as a volunteer in ${city}.`,
           },
         });
       }
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Registration successful! Your account is pending admin approval.',
+      message: 'Registration successful! Your account is active and ready for book seva.',
       volunteerId,
     });
   } catch (error: any) {

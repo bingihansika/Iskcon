@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardCard } from '@/components/DashboardCard';
 import { QRDisplay } from '@/components/QRDisplay';
-import { StatusBadge } from '@/components/StatusBadge';
 import { Modal } from '@/components/Modal';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import {
@@ -15,8 +14,12 @@ import {
   QrCode,
   PlusCircle,
   RotateCcw,
-  Sparkles,
   AlertCircle,
+  UserCheck,
+  ClipboardList,
+  History,
+  Bell,
+  Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -157,7 +160,51 @@ export default function VolunteerDashboardPage() {
         </div>
       </div>
 
-      {/* DASHBOARD METRIC CARDS (Requirement #8 & #49) */}
+      {/* QUICK PORTAL NAVIGATION BAR */}
+      <div className="bg-white p-2 rounded-2xl border border-amber-100 shadow-sm flex flex-wrap gap-1.5 text-xs font-medium overflow-x-auto">
+        <Link href="/volunteer/dashboard" className="px-3.5 py-2 rounded-xl bg-amber-100 text-amber-900 font-bold flex items-center space-x-1.5">
+          <BookOpen className="w-3.5 h-3.5 text-amber-800" />
+          <span>Dashboard</span>
+        </Link>
+        <Link href="/volunteer/profile" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <UserCheck className="w-3.5 h-3.5 text-amber-700" />
+          <span>My Profile</span>
+        </Link>
+        <Link href="/volunteer/orders" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <ClipboardList className="w-3.5 h-3.5 text-amber-700" />
+          <span>Book Orders</span>
+        </Link>
+        <Link href="/volunteer/books" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+          <span>My Allocated Books</span>
+        </Link>
+        <Link href="/volunteer/sales" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <TrendingUp className="w-3.5 h-3.5 text-amber-700" />
+          <span>Sales Entry</span>
+        </Link>
+        <Link href="/volunteer/qr" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <QrCode className="w-3.5 h-3.5 text-amber-700" />
+          <span>Payment QR</span>
+        </Link>
+        <Link href="/volunteer/returns" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+          <span>Unsold Returns</span>
+        </Link>
+        <Link href="/volunteer/settlement" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <Wallet className="w-3.5 h-3.5 text-amber-700" />
+          <span>Settlement</span>
+        </Link>
+        <Link href="/volunteer/history" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <History className="w-3.5 h-3.5 text-amber-700" />
+          <span>Distribution History</span>
+        </Link>
+        <Link href="/volunteer/notifications" className="px-3.5 py-2 rounded-xl text-gray-700 hover:text-amber-900 hover:bg-amber-50 flex items-center space-x-1.5">
+          <Bell className="w-3.5 h-3.5 text-amber-700" />
+          <span>Notifications</span>
+        </Link>
+      </div>
+
+      {/* DASHBOARD METRIC CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <DashboardCard
           title="Books Received"
@@ -249,122 +296,145 @@ export default function VolunteerDashboardPage() {
               <table className="w-full text-xs text-left">
                 <thead className="bg-amber-50/70 text-amber-900 font-serif font-bold">
                   <tr>
+                    <th className="p-3">Sale ID</th>
                     <th className="p-3">Book Edition</th>
-                    <th className="p-3">Qty</th>
-                    <th className="p-3">Total</th>
+                    <th className="p-3 text-center">Qty</th>
+                    <th className="p-3">Total (₹)</th>
                     <th className="p-3">Method</th>
                     <th className="p-3">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {data.recentSales.map((s: any) => (
-                    <tr key={s.id} className="hover:bg-amber-50/30">
-                      <td className="p-3 font-semibold text-gray-900">
-                        {s.bookEdition.book.name} ({s.bookEdition.language.name})
-                      </td>
-                      <td className="p-3 font-bold text-maroon-900">{s.quantity}</td>
-                      <td className="p-3 font-bold text-emerald-700">{formatCurrency(s.totalAmount)}</td>
-                      <td className="p-3">
-                        <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-mono text-[10px]">
-                          {s.paymentMethod}
+                  {data.recentSales.map((sale: any) => (
+                    <tr key={sale.id} className="hover:bg-amber-50/40">
+                      <td className="p-3 font-mono font-bold text-maroon-900">{sale.saleId}</td>
+                      <td className="p-3 font-medium">
+                        {sale.bookEdition?.book?.name}
+                        <span className="text-[10px] text-gray-500 block">
+                          {sale.bookEdition?.language?.name} Edition
                         </span>
                       </td>
-                      <td className="p-3 text-gray-500">{formatDate(s.saleDate)}</td>
+                      <td className="p-3 text-center font-bold">{sale.quantity}</td>
+                      <td className="p-3 font-extrabold text-amber-900">
+                        {formatCurrency(sale.totalAmount)}
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            sale.paymentMethod === 'UPI'
+                              ? 'bg-purple-100 text-purple-800'
+                              : 'bg-emerald-100 text-emerald-800'
+                          }`}
+                        >
+                          {sale.paymentMethod}
+                        </span>
+                      </td>
+                      <td className="p-3 text-gray-500">{formatDate(sale.saleDate)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p className="text-xs text-gray-500 p-4 text-center">No sales recorded yet. Click "Record Book Sale" to log your first sale.</p>
+            <p className="text-xs text-gray-500 py-6 text-center">No sales recorded yet.</p>
           )}
         </div>
       </div>
 
-      {/* RECORD SALE MODAL */}
-      <Modal isOpen={saleModalOpen} onClose={() => setSaleModalOpen(false)} title="Record Field Book Sale">
-        <form onSubmit={handleRecordSale} className="space-y-4">
+      {/* Record Sale Modal */}
+      <Modal
+        isOpen={saleModalOpen}
+        onClose={() => setSaleModalOpen(false)}
+        title="Record New Field Book Sale"
+      >
+        <form onSubmit={handleRecordSale} className="space-y-4 text-xs">
           {saleMsg.error && (
-            <div className="bg-rose-50 text-rose-800 p-3 rounded-xl text-xs border border-rose-200">
-              {saleMsg.error}
+            <div className="bg-rose-50 border border-rose-200 text-rose-800 p-3 rounded-xl flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{saleMsg.error}</span>
             </div>
           )}
+
           {saleMsg.success && (
-            <div className="bg-emerald-50 text-emerald-800 p-3 rounded-xl text-xs border border-emerald-200">
-              {saleMsg.success}
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{saleMsg.success}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-              Select Book Edition *
-            </label>
+            <label className="block font-bold text-gray-700 uppercase mb-1">Select Allocated Book Edition *</label>
             <select
               required
               value={selectedEdition}
               onChange={(e) => setSelectedEdition(e.target.value)}
-              className="w-full p-3 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-saffron-500 bg-white"
+              className="w-full p-3 rounded-xl border border-gray-200 text-xs bg-white font-medium"
             >
-              <option value="">-- Choose Allocated Book --</option>
-              {inventoryList.map((inv) => (
-                <option key={inv.bookEditionId} value={inv.bookEditionId} disabled={inv.remaining <= 0}>
-                  {inv.bookName} ({inv.language}) — {formatCurrency(inv.price)} [Available: {inv.remaining} copies]
+              <option value="">-- Choose Book Edition --</option>
+              {inventoryList.map((item) => (
+                <option
+                  key={item.bookEditionId}
+                  value={item.bookEditionId}
+                  disabled={item.remaining <= 0}
+                >
+                  {item.bookName} ({item.language}) — ₹{item.price} ({item.remaining} copies remaining)
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                Selling Quantity *
-              </label>
+              <label className="block font-bold text-gray-700 uppercase mb-1">Quantity Sold *</label>
               <input
                 type="number"
-                min="1"
                 required
+                min="1"
                 value={saleQty}
-                onChange={(e) => setSaleQty(parseInt(e.target.value, 10) || 1)}
-                className="w-full p-3 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-saffron-500"
+                onChange={(e) => setSaleQty(parseInt(e.target.value, 10))}
+                className="w-full p-3 rounded-xl border border-gray-200 text-sm font-bold focus:outline-none focus:border-saffron-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                Payment Method
-              </label>
+              <label className="block font-bold text-gray-700 uppercase mb-1">Payment Method *</label>
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full p-3 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-saffron-500 bg-white"
+                className="w-full p-3 rounded-xl border border-gray-200 text-xs bg-white font-bold"
               >
-                <option value="UPI">UPI / GPay / PhonePe</option>
-                <option value="CASH">Cash Collection</option>
-                <option value="OTHER">Other Method</option>
+                <option value="UPI">UPI Digital Payment</option>
+                <option value="CASH">Cash Collected</option>
+                <option value="OTHER">Other / Bank Transfer</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-              Customer / Order Reference (Optional)
-            </label>
+            <label className="block font-bold text-gray-700 uppercase mb-1">Customer / Reference Note</label>
             <input
               type="text"
               value={customerRef}
               onChange={(e) => setCustomerRef(e.target.value)}
-              placeholder="e.g. City Mall Stall / Corporate Donor"
-              className="w-full p-3 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-saffron-500"
+              placeholder="e.g. Mall Stall, Temple Visitor, Corporate Sale"
+              className="w-full p-3 rounded-xl border border-gray-200 text-xs"
             />
           </div>
 
-          <div className="pt-3">
+          <div className="pt-2 flex justify-end space-x-2">
+            <button
+              type="button"
+              onClick={() => setSaleModalOpen(false)}
+              className="px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-100 font-bold"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               disabled={saleSubmitting}
-              className="w-full py-3 rounded-xl bg-saffron-600 hover:bg-saffron-700 text-white font-extrabold text-xs shadow-md transition"
+              className="px-6 py-2.5 rounded-xl bg-saffron-600 hover:bg-saffron-700 text-white font-extrabold shadow-md"
             >
-              {saleSubmitting ? 'Recording Sale...' : 'Confirm & Record Sale'}
+              {saleSubmitting ? 'Recording...' : 'Submit Sale Record'}
             </button>
           </div>
         </form>

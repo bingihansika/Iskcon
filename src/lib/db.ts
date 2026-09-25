@@ -259,6 +259,23 @@ const initialContent = [
   { id: 'cms-5', key: 'contact_phone', title: 'Contact Phone', content: '+91 80 2347 1000', updatedAt: new Date() },
 ];
 
+function applyOrderBy(items: any[], orderBy?: any): any[] {
+  if (!orderBy) return items;
+  const list = [...items];
+  const keys = Object.keys(orderBy);
+  if (keys.length === 0) return list;
+  const key = keys[0];
+  const direction = orderBy[key];
+  list.sort((a, b) => {
+    const valA = a[key] instanceof Date ? a[key].getTime() : a[key];
+    const valB = b[key] instanceof Date ? b[key].getTime() : b[key];
+    if (valA < valB) return direction === 'desc' ? 1 : -1;
+    if (valA > valB) return direction === 'desc' ? -1 : 1;
+    return 0;
+  });
+  return list;
+}
+
 class InternalStore {
   languages: any[] = [...initialLanguages];
   categories: any[] = [...initialCategories];
@@ -323,6 +340,7 @@ class InternalStore {
         eds = eds.map((e) => ({
           ...e,
           language: this.languages.find((l) => l.id === e.languageId) || null,
+          inventories: this.inventories.filter((inv) => inv.bookEditionId === e.id),
         }));
       }
       res.editions = eds;
@@ -354,11 +372,41 @@ class InternalStore {
     if (include?.language) {
       res.language = this.languages.find((l) => l.id === e.languageId) || null;
     }
+    if (include?.inventories) {
+      res.inventories = this.inventories.filter((inv) => inv.bookEditionId === e.id);
+    }
+    return res;
+  }
+
+  populateOrder(o: any, include?: any) {
+    if (!o) return null;
+    const res = { ...o };
+    if (include?.volunteer) {
+      res.volunteer = this.populateVolunteer(
+        this.volunteers.find((v) => v.id === o.volunteerId),
+        include.volunteer.include
+      );
+    }
+    const rawItems = this.orderItems.filter((oi) => oi.orderId === o.id);
+    res.items = rawItems.map((oi) => {
+      const copy = { ...oi };
+      if (include?.items?.include?.bookEdition) {
+        copy.bookEdition = this.populateEdition(
+          this.editions.find((e) => e.id === oi.bookEditionId),
+          include.items.include.bookEdition.include
+        );
+      }
+      return copy;
+    });
     return res;
   }
 }
 
-const store = new InternalStore();
+const globalForDb = globalThis as unknown as { __ISKCON_STORE__?: InternalStore };
+const store = globalForDb.__ISKCON_STORE__ || new InternalStore();
+if (process.env.NODE_ENV !== 'production') {
+  globalForDb.__ISKCON_STORE__ = store;
+}
 
 export const db: any = {
   $disconnect: async () => {},
@@ -416,6 +464,7 @@ export const db: any = {
   book: {
     findMany: async (args?: any) => {
       let items = store.books.filter((b) => store.matchWhere(b, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
       if (args?.take) items = items.slice(0, args.take);
       return items.map((b) => store.populateBook(b, args?.include));
     },
@@ -424,8 +473,9 @@ export const db: any = {
       return store.populateBook(item, args?.include);
     },
     findFirst: async (args?: any) => {
-      const item = store.books.find((b) => store.matchWhere(b, args?.where));
-      return store.populateBook(item, args?.include);
+      let items = store.books.filter((b) => store.matchWhere(b, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
+      return store.populateBook(items[0], args?.include);
     },
     count: async (args?: any) => store.books.filter((b) => store.matchWhere(b, args?.where)).length,
     create: async (args: any) => {
@@ -467,9 +517,16 @@ export const db: any = {
   },
 
   user: {
-    findFirst: async (args?: any) => store.users.find((u) => store.matchWhere(u, args?.where)) || null,
+    findFirst: async (args?: any) => {
+      let items = store.users.filter((u) => store.matchWhere(u, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
+      return items[0] || null;
+    },
     findUnique: async (args: any) => store.users.find((u) => store.matchWhere(u, args.where)) || null,
-    findMany: async (args?: any) => store.users.filter((u) => store.matchWhere(u, args?.where)),
+    findMany: async (args?: any) => {
+      let items = store.users.filter((u) => store.matchWhere(u, args?.where));
+      return applyOrderBy(items, args?.orderBy);
+    },
     create: async (args: any) => {
       const item = { id: generateId('usr'), ...args.data, createdAt: new Date(), updatedAt: new Date() };
       store.users.push(item);
@@ -484,15 +541,17 @@ export const db: any = {
 
   volunteer: {
     findFirst: async (args?: any) => {
-      const item = store.volunteers.find((v) => store.matchWhere(v, args?.where));
-      return store.populateVolunteer(item, args?.include);
+      let items = store.volunteers.filter((v) => store.matchWhere(v, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
+      return store.populateVolunteer(items[0], args?.include);
     },
     findUnique: async (args: any) => {
       const item = store.volunteers.find((v) => store.matchWhere(v, args.where));
       return store.populateVolunteer(item, args?.include);
     },
     findMany: async (args?: any) => {
-      const items = store.volunteers.filter((v) => store.matchWhere(v, args?.where));
+      let items = store.volunteers.filter((v) => store.matchWhere(v, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
       return items.map((v) => store.populateVolunteer(v, args?.include));
     },
     count: async (args?: any) => store.volunteers.filter((v) => store.matchWhere(v, args?.where)).length,
@@ -546,7 +605,8 @@ export const db: any = {
 
   bookAllocation: {
     findMany: async (args?: any) => {
-      const items = store.allocations.filter((a) => store.matchWhere(a, args?.where));
+      let items = store.allocations.filter((a) => store.matchWhere(a, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
       return items.map((a) => ({
         ...a,
         bookEdition: args?.include?.bookEdition ? store.populateEdition(store.editions.find((e) => e.id === a.bookEditionId), args.include.bookEdition.include) : null,
@@ -568,6 +628,7 @@ export const db: any = {
   sale: {
     findMany: async (args?: any) => {
       let items = store.sales.filter((s) => store.matchWhere(s, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
       if (args?.take) items = items.slice(0, args.take);
       return items.map((s) => ({
         ...s,
@@ -590,7 +651,8 @@ export const db: any = {
 
   payment: {
     findMany: async (args?: any) => {
-      const items = store.payments.filter((p) => store.matchWhere(p, args?.where));
+      let items = store.payments.filter((p) => store.matchWhere(p, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
       return items.map((p) => ({
         ...p,
         volunteer: args?.include?.volunteer ? store.populateVolunteer(store.volunteers.find((v) => v.id === p.volunteerId), args.include.volunteer.include) : null,
@@ -605,7 +667,8 @@ export const db: any = {
 
   return: {
     findMany: async (args?: any) => {
-      const items = store.returns.filter((r) => store.matchWhere(r, args?.where));
+      let items = store.returns.filter((r) => store.matchWhere(r, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
       return items.map((r) => ({
         ...r,
         volunteer: args?.include?.volunteer ? store.populateVolunteer(store.volunteers.find((v) => v.id === r.volunteerId), args.include.volunteer.include) : null,
@@ -634,22 +697,40 @@ export const db: any = {
 
   volunteerOrder: {
     findMany: async (args?: any) => {
-      const items = store.orders.filter((o) => store.matchWhere(o, args?.where));
-      return items.map((o) => ({
-        ...o,
-        volunteer: args?.include?.volunteer ? store.populateVolunteer(store.volunteers.find((v) => v.id === o.volunteerId), args.include.volunteer.include) : null,
-        items: store.orderItems.filter((oi) => oi.orderId === o.id),
-      }));
+      let items = store.orders.filter((o) => store.matchWhere(o, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
+      if (args?.take) items = items.slice(0, args.take);
+      return items.map((o) => store.populateOrder(o, args?.include));
+    },
+    findFirst: async (args?: any) => {
+      let items = store.orders.filter((o) => store.matchWhere(o, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
+      return items[0] ? store.populateOrder(items[0], args?.include) : null;
+    },
+    findUnique: async (args: any) => {
+      const item = store.orders.find((o) => store.matchWhere(o, args.where));
+      return store.populateOrder(item, args?.include);
     },
     create: async (args: any) => {
-      const item = { id: generateId('ord'), ...args.data, orderDate: new Date(), createdAt: new Date(), updatedAt: new Date() };
+      const { items, ...orderData } = args.data;
+      const id = generateId('ord');
+      const item = { id, ...orderData, orderDate: new Date(), createdAt: new Date(), updatedAt: new Date() };
       store.orders.push(item);
-      return item;
+      if (items?.create && Array.isArray(items.create)) {
+        items.create.forEach((it: any) => {
+          store.orderItems.push({
+            id: generateId('voi'),
+            orderId: id,
+            ...it,
+          });
+        });
+      }
+      return store.populateOrder(item, args?.include);
     },
     update: async (args: any) => {
       const item = store.orders.find((o) => store.matchWhere(o, args.where));
       if (item) Object.assign(item, args.data, { updatedAt: new Date() });
-      return item;
+      return store.populateOrder(item, args?.include);
     },
   },
 
@@ -664,7 +745,8 @@ export const db: any = {
   settlement: {
     findFirst: async (args?: any) => store.settlements.find((s) => store.matchWhere(s, args?.where)) || null,
     findMany: async (args?: any) => {
-      const items = store.settlements.filter((s) => store.matchWhere(s, args?.where));
+      let items = store.settlements.filter((s) => store.matchWhere(s, args?.where));
+      items = applyOrderBy(items, args?.orderBy);
       return items.map((s) => ({
         ...s,
         volunteer: args?.include?.volunteer ? store.populateVolunteer(store.volunteers.find((v) => v.id === s.volunteerId), args.include.volunteer.include) : null,
@@ -688,7 +770,10 @@ export const db: any = {
   },
 
   notification: {
-    findMany: async (args?: any) => store.notifications.filter((n) => store.matchWhere(n, args?.where)),
+    findMany: async (args?: any) => {
+      let items = store.notifications.filter((n) => store.matchWhere(n, args?.where));
+      return applyOrderBy(items, args?.orderBy);
+    },
     create: async (args: any) => {
       const item = { id: generateId('notif'), ...args.data, createdAt: new Date() };
       store.notifications.push(item);
@@ -703,7 +788,10 @@ export const db: any = {
   },
 
   auditLog: {
-    findMany: async (args?: any) => store.auditLogs.filter((a) => store.matchWhere(a, args?.where)),
+    findMany: async (args?: any) => {
+      let items = store.auditLogs.filter((a) => store.matchWhere(a, args?.where));
+      return applyOrderBy(items, args?.orderBy);
+    },
     create: async (args: any) => {
       const item = { id: generateId('audit'), ...args.data, createdAt: new Date() };
       store.auditLogs.push(item);

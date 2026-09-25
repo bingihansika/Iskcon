@@ -3,6 +3,8 @@ import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { DemoSwitcher } from '@/components/DemoSwitcher';
+import { BasketProvider } from '@/context/BasketContext';
+import { BasketDrawer } from '@/components/BasketDrawer';
 
 export const metadata: Metadata = {
   title: 'ISKCON Bookstore & Volunteer Management System',
@@ -18,10 +20,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen flex flex-col justify-between">
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        <DemoSwitcher />
+        <BasketProvider>
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+          <DemoSwitcher />
+          <BasketDrawer />
+        </BasketProvider>
       </body>
     </html>
   );

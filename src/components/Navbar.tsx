@@ -13,17 +13,18 @@ import {
   LogOut,
   ShoppingBag,
   Bell,
-  Heart,
   ChevronRight,
   Flame,
 } from 'lucide-react';
 import { TokenPayload } from '@/lib/auth';
 import { NotificationBell } from './NotificationBell';
+import { useBasket } from '@/context/BasketContext';
 
 export const Navbar: React.FC = () => {
   const [session, setSession] = useState<TokenPayload | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { totalItems, openBasket } = useBasket();
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -132,8 +133,22 @@ export const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          {/* User Role Actions */}
+          {/* User Role Actions & Basket Trigger */}
           <div className="hidden lg:flex items-center space-x-3">
+            {/* Basket Drawer Trigger Button */}
+            <button
+              onClick={openBasket}
+              className="relative p-2.5 text-maroon-900 bg-amber-50 hover:bg-amber-100 rounded-xl border border-amber-200 transition flex items-center justify-center"
+              title="Distribution Basket"
+            >
+              <ShoppingBag className="w-5 h-5 text-maroon-900" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-saffron-600 text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+
             {session ? (
               <div className="flex items-center space-x-2">
                 <NotificationBell role={session.role} />
@@ -196,8 +211,20 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Mobile menu trigger */}
+          {/* Mobile Menu & Basket Trigger */}
           <div className="flex lg:hidden items-center space-x-2">
+            <button
+              onClick={openBasket}
+              className="relative p-2.5 rounded-xl bg-amber-50 text-maroon-900 border border-amber-200 focus:outline-none"
+              title="Distribution Basket"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-saffron-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 focus:outline-none"

@@ -2,8 +2,9 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
-import { BookOpen, Globe, CheckCircle, Sparkles, ChevronLeft, ShieldCheck, Tag, Info } from 'lucide-react';
+import { BookOpen, Globe, Sparkles, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { AddToBasketButton } from '@/components/AddToBasketButton';
 
 export const revalidate = 0;
 
@@ -109,15 +110,15 @@ export default async function BookDetailPage({ params }: { params: { id: string 
             </div>
           )}
 
-          {/* LANGUAGE EDITIONS INVENTORY MATRIX (Requirement 4.4) */}
+          {/* LANGUAGE EDITIONS INVENTORY MATRIX */}
           <div className="space-y-4 pt-4 border-t border-amber-100">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold font-serif text-maroon-900 flex items-center">
                 <Globe className="w-5 h-5 text-saffron-600 mr-2" />
-                Available Language Editions & Inventory
+                Available Language Editions & Seva Request
               </h3>
               <span className="text-xs text-amber-800 font-semibold bg-amber-100 px-2.5 py-0.5 rounded-full">
-                Independent Stock Tracking
+                Select Edition for Basket
               </span>
             </div>
 
@@ -127,7 +128,7 @@ export default async function BookDetailPage({ params }: { params: { id: string 
                 const isLow = availStock < 50;
 
                 return (
-                  <div key={ed.id} className="p-4 flex items-center justify-between hover:bg-amber-50/50 transition">
+                  <div key={ed.id} className="p-4 flex items-center justify-between hover:bg-amber-50/50 transition gap-4">
                     <div>
                       <div className="flex items-center space-x-2">
                         <span className="font-bold font-serif text-sm text-maroon-900">
@@ -138,21 +139,34 @@ export default async function BookDetailPage({ params }: { params: { id: string 
                       <p className="text-xs text-gray-500 mt-0.5">ISBN: {ed.isbn || 'N/A'}</p>
                     </div>
 
-                    <div className="text-right space-y-1">
-                      <span className="text-sm font-extrabold text-amber-900 font-serif block">
-                        {formatCurrency(ed.price)}
-                      </span>
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          availStock > 0
-                            ? isLow
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-emerald-100 text-emerald-800'
-                            : 'bg-rose-100 text-rose-800'
-                        }`}
-                      >
-                        {availStock > 0 ? `${availStock} Available` : 'Out of Stock'}
-                      </span>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right space-y-1">
+                        <span className="text-sm font-extrabold text-amber-900 font-serif block">
+                          {formatCurrency(ed.price)}
+                        </span>
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            availStock > 0
+                              ? isLow
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-emerald-100 text-emerald-800'
+                              : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {availStock > 0 ? `${availStock} Available` : 'Out of Stock'}
+                        </span>
+                      </div>
+
+                      <AddToBasketButton
+                        bookEditionId={ed.id}
+                        bookId={book.id}
+                        bookName={book.name}
+                        author={book.author}
+                        editionName={ed.editionName}
+                        languageName={ed.language.name}
+                        price={ed.price}
+                        coverImage={book.coverImage}
+                      />
                     </div>
                   </div>
                 );
@@ -163,9 +177,9 @@ export default async function BookDetailPage({ params }: { params: { id: string 
           <div className="pt-4 flex items-center space-x-4">
             <Link
               href="/volunteer/register"
-              className="flex-1 bg-saffron-600 hover:bg-saffron-700 text-white text-center py-3.5 rounded-2xl font-extrabold shadow-md transition"
+              className="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 text-center py-3.5 rounded-2xl font-extrabold border border-amber-300 transition"
             >
-              Become a Volunteer to Request Books
+              Become a Volunteer for Direct Distributions
             </Link>
           </div>
         </div>

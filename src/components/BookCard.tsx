@@ -2,23 +2,38 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, Sparkles, ChevronRight, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { BookOpen, Sparkles, ChevronRight, ShoppingBag } from 'lucide-react';
 import { Book } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { StatusBadge } from './StatusBadge';
+import { useBasket } from '@/context/BasketContext';
 
 interface BookCardProps {
   book: Book;
   onSelect?: (book: Book) => void;
 }
 
-export const BookCard: React.FC<BookCardProps> = ({ book, onSelect }) => {
-  // Determine representative price and total stock from editions if available
+export const BookCard: React.FC<BookCardProps> = ({ book }) => {
+  const { addItem } = useBasket();
+
   const defaultEdition = book.editions?.[0];
   const price = defaultEdition ? defaultEdition.price : 150;
-  
-  // Available languages count
-  const languagesCount = book.editions ? new Set(book.editions.map(e => e.language?.name || 'English')).size : 1;
+  const languagesCount = book.editions ? new Set(book.editions.map((e) => e.language?.name || 'English')).size : 1;
+
+  const handleAddToBasket = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!defaultEdition) return;
+    addItem({
+      bookEditionId: defaultEdition.id,
+      bookId: book.id,
+      bookName: book.name,
+      author: book.author,
+      editionName: defaultEdition.editionName || 'Standard Edition',
+      languageName: defaultEdition.language?.name || 'English',
+      price: defaultEdition.price,
+      quantity: 1,
+      coverImage: book.coverImage,
+    });
+  };
 
   return (
     <div className="bg-white rounded-3xl border border-amber-100/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
@@ -71,7 +86,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onSelect }) => {
       </div>
 
       {/* Card Footer */}
-      <div className="p-5 pt-0 border-t border-gray-50 mt-2 flex items-center justify-between">
+      <div className="p-5 pt-0 border-t border-gray-50 mt-2 flex items-center justify-between gap-2">
         <div>
           <span className="text-[10px] text-gray-400 block font-medium">Starting from</span>
           <span className="text-lg font-extrabold text-amber-900 font-serif">
@@ -79,13 +94,24 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onSelect }) => {
           </span>
         </div>
 
-        <Link
-          href={`/books/${book.id}`}
-          className="flex items-center space-x-1 px-4 py-2 rounded-xl bg-amber-100 text-amber-900 font-semibold text-xs border border-amber-300 hover:bg-saffron-600 hover:text-white hover:border-saffron-600 transition shadow-sm"
-        >
-          <span>View Details</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </Link>
+        <div className="flex items-center space-x-1.5">
+          <button
+            onClick={handleAddToBasket}
+            className="flex items-center space-x-1 px-3 py-2 rounded-xl bg-saffron-600 text-white font-bold text-xs hover:bg-saffron-700 transition shadow-sm"
+            title="Add to Seva Basket"
+          >
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>Add</span>
+          </button>
+
+          <Link
+            href={`/books/${book.id}`}
+            className="flex items-center space-x-1 px-3 py-2 rounded-xl bg-amber-50 text-amber-900 font-semibold text-xs border border-amber-200 hover:bg-amber-100 transition"
+          >
+            <span>View</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
     </div>
   );

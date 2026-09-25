@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
+  BookOpen,
+  PackageCheck,
   Layers,
   ClipboardList,
   RotateCcw,
@@ -28,7 +30,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Volunteers', href: '/admin/volunteers', icon: Users },
+    { label: 'Volunteers Management', href: '/admin/volunteers', icon: Users },
+    { label: 'Book Catalog', href: '/admin/books', icon: BookOpen },
+    { label: 'Book Allocation', href: '/admin/allocation', icon: PackageCheck },
     { label: 'Inventory Management', href: '/admin/inventory', icon: Layers },
     { label: 'Volunteer Orders', href: '/admin/orders', icon: ClipboardList },
     { label: 'Returns Reconciliation', href: '/admin/returns', icon: RotateCcw },
